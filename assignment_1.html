@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toc</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px;
+        }
+        td {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+        td:hover {
+            background-color: lightgray;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="scoreboard">
+        <h3>Scoreboard</h3>
+        <ul id="historyList"></ul>
+    </div>
+
+    <table id="grid">
+        <tr>
+            <td data-pos="0,0"></td>
+            <td data-pos="1,0"></td>
+            <td data-pos="2,0"></td>
+        </tr>
+        <tr>
+            <td data-pos="0,1"></td>
+            <td data-pos="1,1"></td>
+            <td data-pos="2,1"></td>
+        </tr>
+        <tr>
+            <td data-pos="0,2"></td>
+            <td data-pos="1,2"></td>
+            <td data-pos="2,2"></td>
+        </tr>
+    </table>
+</div>
+
+<button onclick="checkBingo()">Who Won</button>
+<button onclick="resetGame()">Game Restart</button>
+<button onclick="clearAll()">Clear All</button>
+
+<script>
+    // 動態設置樣式
+    document.querySelector('.container').style.display = 'flex';
+    document.querySelector('.container').style.justifyContent = 'center';
+    document.querySelector('.container').style.alignItems = 'flex-start';
+    document.querySelector('.container').style.marginTop = '20px';
+
+    document.getElementById('scoreboard').style.marginRight = '20px';
+    document.getElementById('scoreboard').style.textAlignz = 'center';
+
+    let currentPlayer = 'X';
+    let xCount = 0, yCount = 0;
+    const cells = document.querySelectorAll('#grid td');
+    const historyList = document.getElementById('historyList');
+
+    cells.forEach(cell => {
+        cell.addEventListener('click', function () {
+            if (this.textContent === '') {
+                if (currentPlayer === 'X' && xCount <= yCount) {
+                    this.textContent = 'X';
+                    currentPlayer = 'Y';
+                    xCount++;
+                } else if (currentPlayer === 'Y' && yCount < xCount) {
+                    this.textContent = 'Y';
+                    currentPlayer = 'X';
+                    yCount++;
+                }
+            }
+        });
+    });
+
+    function checkBingo() {
+        const winningCombinations = [
+            ['0,0', '1,0', '2,0'],
+            ['0,1', '1,1', '2,1'],
+            ['0,2', '1,2', '2,2'],
+            ['0,0', '0,1', '0,2'],
+            ['1,0', '1,1', '1,2'],
+            ['2,0', '2,1', '2,2'],
+            ['0,0', '1,1', '2,2'],
+            ['2,0', '1,1', '0,2']
+        ];
+
+        for (let combination of winningCombinations) {
+            const [a, b, c] = combination.map(pos => document.querySelector(`[data-pos="${pos}"]`).textContent);
+            if (a && a === b && a === c) {
+                alert(`Player ${a} wins！`);
+                updateScoreboard(a);
+                return;
+            }
+        }
+
+        if (xCount + yCount === 9) {
+            alert('It\'s a draw！');
+            updateScoreboard('Draw');
+        } else {
+            alert('Not yet bingo！');
+        }
+    }
+
+    function resetGame() {
+        cells.forEach(cell => {
+            cell.textContent = '';
+        });
+        currentPlayer = 'X';
+        xCount = 0;
+        yCount = 0;
+    }
+
+    function updateScoreboard(winner) {
+        const listItem = document.createElement('li');
+        if (winner === 'Draw') {
+            listItem.textContent = `Draw`;
+        } else {
+            listItem.textContent = `Player ${winner} won the game`;
+        }
+        historyList.appendChild(listItem);
+    }
+
+    function clearAll() {
+        resetGame();
+        historyList.innerHTML = '';
+    }
+</script>
+
+</body>
+</html>
