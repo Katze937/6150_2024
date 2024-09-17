@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }
+    .todo-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      cursor: move;
+    }
+    .checkbox {
+      margin-right: 10px;
+    }
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 3px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: grey;
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h1>Todo List</h1>
+    <input type="text" id="new-task-input" placeholder="Add a new task...">
+    <button id="add-task-button">Add Task</button>
+    <ul id="todo-list"></ul>
+  </div>
+
+  <script>
+    // 新增項目
+    document.getElementById('add-task-button').addEventListener('click', function() {
+      const input = document.getElementById('new-task-input');
+      const taskText = input.value;
+      
+      if (taskText) {
+        addTask(taskText);
+        input.value = ''; // 清空輸入框
+      }
+    });
+
+    function addTask(taskText) {
+      const todoList = document.getElementById('todo-list');
+      
+      // 創建li元素
+      const li = document.createElement('li');
+      li.setAttribute('draggable', true);
+
+      // 創建checkbox
+      const checkbox = document.createElement('input');
+      checkbox.setAttribute('type', 'checkbox');
+      checkbox.classList.add('checkbox');
+
+      // 創建刪除按鈕
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.classList.add('delete-btn');
+
+      // 刪除項目功能
+      deleteButton.addEventListener('click', function() {
+        li.remove();
+      });
+
+      // 勾選時加上刪除線
+      checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
+          li.classList.add('completed');
+        } else {
+          li.classList.remove('completed');
+        }
+      });
+
+      // 組合元素
+      li.appendChild(checkbox);
+      li.appendChild(document.createTextNode(taskText));
+      li.appendChild(deleteButton);
+      
+      todoList.appendChild(li);
+      
+      // 設置拖曳功能
+      addDragAndDrop(li);
+    }
+
+    // 拖曳排序功能
+    function addDragAndDrop(item) {
+      let draggedItem = null;
+
+      item.addEventListener('dragstart', function() {
+        draggedItem = item;
+        setTimeout(function() {
+          item.style.display = 'none';
+        }, 0);
+      });
+
+      item.addEventListener('dragend', function() {
+        setTimeout(function() {
+          item.style.display = 'flex';
+          draggedItem = null;
+        }, 0);
+      });
+
+      item.addEventListener('dragover', function(e) {
+        e.preventDefault(); // 必須阻止默認行為，才能啟用drop事件
+      });
+
+      item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        if (draggedItem !== null && draggedItem !== item) {
+          const todoList = document.getElementById('todo-list');
+          todoList.insertBefore(draggedItem, item.nextSibling); // 在目標元素的下一個位置插入被拖動的項目，修改不成功
+        }
+      });
+    }
+  </script>
+</body>
+</html>
