@@ -96,16 +96,17 @@
         document.getElementById('searchForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const searchCode = document.getElementById('searchCode').value;
-            const searchName = document.getElementById('searchName').value;
+            const searchCode = document.getElementById('searchCode').value.toLowerCase(); // 轉換為小寫
+            const searchName = document.getElementById('searchName').value.toLowerCase(); // 轉換為小寫
 
             const filteredItems = menuItems.filter(item => {
-                return (searchCode && item.itemCode.includes(searchCode)) ||
-                       (searchName && item.itemName.includes(searchName));
+                return (searchCode && item.itemCode.toLowerCase().includes(searchCode)) || // 轉換為小寫比較
+                    (searchName && item.itemName.toLowerCase().includes(searchName)); // 轉換為小寫比較
             });
 
             displayMenuItems(filteredItems);
         });
+
         // 顯示所有品項
         document.getElementById('showAll').addEventListener('click', function () {
             displayMenuItems();
