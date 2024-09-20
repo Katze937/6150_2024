@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Management</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Menu Management System</h1>
+
+    <!-- 新增/更新表單 Add/Update Menu -->
+    <form id="itemForm">
+        <label for="itemCode">Item Code:</label>
+        <input type="text" id="itemCode" required oninput="this.setCustomValidity('')" oninvalid="this.setCustomValidity('Please enter the item code')">
+        
+        <label for="itemName">Item Name:</label>
+        <input type="text" id="itemName" required oninput="this.setCustomValidity('')" oninvalid="this.setCustomValidity('Please enter the item name')">
+        
+        <label for="price">Price:</label>
+        <input type="number" id="price" required oninput="this.setCustomValidity('')" oninvalid="this.setCustomValidity('Please enter a valid price')">
+        
+        <label for="stock">Inventory Quantity:</label>
+        <input type="number" id="stock" required oninput="this.setCustomValidity('')" oninvalid="this.setCustomValidity('Please enter the inventory quantity')">
+        
+        <button type="submit">Add / Update Item</button>
+    </form>
+    
+
+    <!-- 搜尋表單 Search Menu-->
+    <form id="searchForm">
+        <label for="searchCode">Search Item Code:</label>
+        <input type="text" id="searchCode">
+        <label for="searchName">Search Item Name:</label>
+        <input type="text" id="searchName">
+        <button type="submit">Search</button>
+        <button type="button" id="DisplayItem">Display Item</button>
+    </form>
+
+    <!-- 列表 List -->
+    <h2>Menu List</h2>
+    <table id="menuTable">
+        <thead>
+            <tr>
+                <th data-column="itemCode">Item Code</th>
+                <th data-column="itemName">Item Name</th>
+                <th data-column="price">Price</th>
+                <th data-column="stock">Inventory Quantity</th>
+                <th>Editing</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 資料將顯示在這裡 The data will show here -->
+        </tbody>
+    </table>
+
+    <script>
+        // 關閉應用邏輯的閉包 Application Logic in Closure
+        const menuManager = (function() {
+            // 用來存儲菜單品項 For storing the menu item
+            let menuItems = [];
+
+            return {
+                addItem: function(itemCode, itemName, price, stock) {
+                    const existingItemIndex = menuItems.findIndex(item => item.itemCode === itemCode);
+                    if (existingItemIndex !== -1) {
+                        // 更新品項 Update Item
+                        menuItems[existingItemIndex] = { itemCode, itemName, price, stock };
+                    } else {
+                        // 新增品項 Add Item
+                        menuItems.push({ itemCode, itemName, price, stock });
+                    }
+                },
+                deleteItem: function(itemCode) {
+                    menuItems = menuItems.filter(item => item.itemCode !== itemCode);
+                },
+                getItems: function() {
+                    return menuItems;
+                },
+                filterItems: function(searchCode, searchName) {
+                    return menuItems.filter(item => {
+                        return (searchCode && item.itemCode.toLowerCase().includes(searchCode)) ||
+                               (searchName && item.itemName.toLowerCase().includes(searchName));
+                    });
+                }
+            };
+        })();
+
+        // 用戶界面邏輯 UI Logic
+        function displayMenuItems(items) {
+            const tableBody = document.querySelector('#menuTable tbody');
+            tableBody.innerHTML = '';
+
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.itemCode}</td>
+                    <td>${item.itemName}</td>
+                    <td>${item.price}</td>
+                    <td>${item.stock}</td>
+                    <td><button onclick="deleteItem('${item.itemCode}')">Deleting</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 新增或更新品項 Add / Update Item
+        document.getElementById('itemForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const itemCode = document.getElementById('itemCode').value;
+            const itemName = document.getElementById('itemName').value;
+            const price = document.getElementById('price').value;
+            const stock = document.getElementById('stock').value;
+
+            menuManager.addItem(itemCode, itemName, price, stock);
+            displayMenuItems(menuManager.getItems());
+            clearForm();
+        });
+
+        // 刪減品項 Delete Item
+        window.deleteItem = function(itemCode) {
+            menuManager.deleteItem(itemCode);
+            displayMenuItems(menuManager.getItems());
+        };
+
+        // 搜尋品項 Search Item
+        document.getElementById('searchForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const searchCode = document.getElementById('searchCode').value.toLowerCase();
+            const searchName = document.getElementById('searchName').value.toLowerCase();
+
+            const filteredItems = menuManager.filterItems(searchCode, searchName);
+            displayMenuItems(filteredItems);
+        });
+
+        // 顯示所有品項
+        document.getElementById('DisplayItem').addEventListener('click', function () {
+            displayMenuItems(menuManager.getItems());
+            document.getElementById('searchForm').reset();
+        });
+
+        // 清除表單
+        function clearForm() {
+            document.getElementById('itemForm').reset();
+        }
+
+        // 對表格欄位排序功能
+        const headers = document.querySelectorAll('th[data-column]');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-column');
+                const items = menuManager.getItems();
+                items.sort((a, b) => a[column] > b[column] ? 1 : -1);
+                displayMenuItems(items);
+            });
+        });
+    </script>
+</body>
+</html>
