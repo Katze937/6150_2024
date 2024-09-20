@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px;
+        }
+        td {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+        td:hover {
+            background-color: lightgray;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="scoreboard">
+        <h3>Scoreboard</h3>
+        <ul id="historyList"></ul>
+    </div>
+
+    <table id="grid">
+        <tr>
+            <td data-pos="0,0"></td>
+            <td data-pos="1,0"></td>
+            <td data-pos="2,0"></td>
+        </tr>
+        <tr>
+            <td data-pos="0,1"></td>
+            <td data-pos="1,1"></td>
+            <td data-pos="2,1"></td>
+        </tr>
+        <tr>
+            <td data-pos="0,2"></td>
+            <td data-pos="1,2"></td>
+            <td data-pos="2,2"></td>
+        </tr>
+    </table>
+</div>
+
+<button id="checkWinner">Who Won</button>
+<button id="resetGame">Game Restart</button>
+<button id="clearAll">Clear All</button>
+
+<script>
+    // 使用閉包將遊戲邏輯和狀態封裝
+    const ticTacToe = (function() {
+        let currentPlayer = 'X';
+        let xCount = 0, yCount = 0;
+        const board = Array(3).fill(null).map(() => Array(3).fill(''));
+        const historyList = document.getElementById('historyList');
+
+        const winningCombinations = [
+            ['0,0', '1,0', '2,0'],
+            ['0,1', '1,1', '2,1'],
+            ['0,2', '1,2', '2,2'],
+            ['0,0', '0,1', '0,2'],
+            ['1,0', '1,1', '1,2'],
+            ['2,0', '2,1', '2,2'],
+            ['0,0', '1,1', '2,2'],
+            ['2,0', '1,1', '0,2']
+        ];
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'Y' : 'X';
+        }
+
+        function updateBoard(x, y) {
+            if (board[x][y] === '') {
+                board[x][y] = currentPlayer;
+                return true;
+            }
+            return false;
+        }
+
+        function checkWinner() {
+            for (let combination of winningCombinations) {
+                const [a, b, c] = combination.map(pos => {
+                    const [x, y] = pos.split(',').map(Number);
+                    return board[x][y];
+                });
+                if (a && a === b && a === c) {
+                    return a;
+                }
+            }
+            return (xCount + yCount === 9) ? 'Draw' : null;
+        }
+
+        function resetGame() {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    board[i][j] = '';
+                }
+            }
+            currentPlayer = 'X';
+            xCount = 0;
+            yCount = 0;
+        }
+
+        function addHistory(winner) {
+            const listItem = document.createElement('li');
+            listItem.textContent = winner === 'Draw' ? 'Draw' : `Player ${winner} won the game`;
+            historyList.appendChild(listItem);
+        }
+
+        return {
+            play(x, y) {
+                if (updateBoard(x, y)) {
+                    currentPlayer === 'X' ? xCount++ : yCount++;
+                    switchPlayer();
+                    return true;
+                }
+                return false;
+            },
+            checkWinner() {
+                return checkWinner();
+            },
+            resetGame() {
+                resetGame();
+            },
+            addHistory(winner) {
+                addHistory(winner);
+            }
+        };
+    })();
+
+    // 動態設置樣式
+    document.querySelector('.container').style.display = 'flex';
+    document.querySelector('.container').style.justifyContent = 'center';
+    document.querySelector('.container').style.alignItems = 'flex-start';
+    document.querySelector('.container').style.marginTop = '20px';
+
+    document.getElementById('scoreboard').style.marginRight = '20px';
+    document.getElementById('scoreboard').style.textAlign = 'center';
+
+    const cells = document.querySelectorAll('#grid td');
+
+    // 綁定事件處理程序
+    cells.forEach(cell => {
+        cell.addEventListener('click', function () {
+            const [x, y] = this.getAttribute('data-pos').split(',').map(Number);
+            if (ticTacToe.play(x, y)) {
+                this.textContent = ticTacToe.currentPlayer === 'X' ? 'Y' : 'X';
+            }
+        });
+    });
+
+    document.getElementById('checkWinner').addEventListener('click', function() {
+        const winner = ticTacToe.checkWinner();
+        if (winner) {
+            alert(winner === 'Draw' ? "It's a draw!" : `Player ${winner} wins!`);
+            ticTacToe.addHistory(winner);
+        } else {
+            alert('Not yet bingo!');
+        }
+    });
+
+    document.getElementById('resetGame').addEventListener('click', function() {
+        ticTacToe.resetGame();
+        cells.forEach(cell => {
+            cell.textContent = '';
+        });
+    });
+
+    document.getElementById('clearAll').addEventListener('click', function() {
+        ticTacToe.resetGame();
+        cells.forEach(cell => {
+            cell.textContent = '';
+        });
+        document.getElementById('historyList').innerHTML = '';
+    });
+</script>
+
+</body>
+</html>
