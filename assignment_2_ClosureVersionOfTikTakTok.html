@@ -60,82 +60,87 @@
 <script>
     // 使用閉包將遊戲邏輯和狀態封裝
     const ticTacToe = (function() {
-        let currentPlayer = 'X';
-        let xCount = 0, yCount = 0;
-        const board = Array(3).fill(null).map(() => Array(3).fill(''));
-        const historyList = document.getElementById('historyList');
+    let currentPlayer = 'X';
+    let xCount = 0, yCount = 0;
+    const board = Array(3).fill(null).map(() => Array(3).fill(''));
+    const historyList = document.getElementById('historyList');
 
-        const winningCombinations = [
-            ['0,0', '1,0', '2,0'],
-            ['0,1', '1,1', '2,1'],
-            ['0,2', '1,2', '2,2'],
-            ['0,0', '0,1', '0,2'],
-            ['1,0', '1,1', '1,2'],
-            ['2,0', '2,1', '2,2'],
-            ['0,0', '1,1', '2,2'],
-            ['2,0', '1,1', '0,2']
-        ];
+    const winningCombinations = [
+        ['0,0', '1,0', '2,0'],
+        ['0,1', '1,1', '2,1'],
+        ['0,2', '1,2', '2,2'],
+        ['0,0', '0,1', '0,2'],
+        ['1,0', '1,1', '1,2'],
+        ['2,0', '2,1', '2,2'],
+        ['0,0', '1,1', '2,2'],
+        ['2,0', '1,1', '0,2']
+    ];
 
-        function switchPlayer() {
-            currentPlayer = currentPlayer === 'X' ? 'Y' : 'X';
+    function switchPlayer() {
+        currentPlayer = currentPlayer === 'X' ? 'Y' : 'X';
+    }
+
+    function updateBoard(x, y) {
+        if (board[x][y] === '') {
+            board[x][y] = currentPlayer;
+            return currentPlayer;
         }
+        return null;
+    }
 
-        function updateBoard(x, y) {
-            if (board[x][y] === '') {
-                board[x][y] = currentPlayer;
-                return true;
+    function checkWinner() {
+        for (let combination of winningCombinations) {
+            const [a, b, c] = combination.map(pos => {
+                const [x, y] = pos.split(',').map(Number);
+                return board[x][y];
+            });
+            if (a && a === b && a === c) {
+                return a;
             }
-            return false;
         }
+        return (xCount + yCount === 9) ? 'Draw' : null;
+    }
 
-        function checkWinner() {
-            for (let combination of winningCombinations) {
-                const [a, b, c] = combination.map(pos => {
-                    const [x, y] = pos.split(',').map(Number);
-                    return board[x][y];
-                });
-                if (a && a === b && a === c) {
-                    return a;
+    function resetGame() {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                board[i][j] = '';
+            }
+        }
+        currentPlayer = 'X';
+        xCount = 0;
+        yCount = 0;
+    }
+
+    function addHistory(winner) {
+        const listItem = document.createElement('li');
+        listItem.textContent = winner === 'Draw' ? 'Draw' : `Player ${winner} won the game`;
+        historyList.appendChild(listItem);
+    }
+
+    return {
+        play(x, y) {
+            const player = updateBoard(x, y);
+            if (player) {
+                if (player === 'X') {
+                    xCount++;
+                } else {
+                    yCount++;
                 }
+                switchPlayer();
+                return player;  // 返回剛剛的玩家符號
             }
-            return (xCount + yCount === 9) ? 'Draw' : null;
+            return null;
+        },
+        checkWinner() {
+            return checkWinner();
+        },
+        resetGame() {
+            resetGame();
+        },
+        addHistory(winner) {
+            addHistory(winner);
         }
-
-        function resetGame() {
-            for (let i = 0; i < 3; i++) {
-                for (let j = 0; j < 3; j++) {
-                    board[i][j] = '';
-                }
-            }
-            currentPlayer = 'X';
-            xCount = 0;
-            yCount = 0;
-        }
-
-        function addHistory(winner) {
-            const listItem = document.createElement('li');
-            listItem.textContent = winner === 'Draw' ? 'Draw' : `Player ${winner} won the game`;
-            historyList.appendChild(listItem);
-        }
-
-        return {
-            play(x, y) {
-                if (updateBoard(x, y)) {
-                    currentPlayer === 'X' ? xCount++ : yCount++;
-                    switchPlayer();
-                    return true;
-                }
-                return false;
-            },
-            checkWinner() {
-                return checkWinner();
-            },
-            resetGame() {
-                resetGame();
-            },
-            addHistory(winner) {
-                addHistory(winner);
-            }
         };
     })();
 
@@ -154,8 +159,9 @@
     cells.forEach(cell => {
         cell.addEventListener('click', function () {
             const [x, y] = this.getAttribute('data-pos').split(',').map(Number);
-            if (ticTacToe.play(x, y)) {
-                this.textContent = ticTacToe.currentPlayer === 'X' ? 'Y' : 'X';
+            const player = ticTacToe.play(x, y);  // 使用返回的玩家符號
+            if (player) {
+                this.textContent = player;  // 更新格子內容
             }
         });
     });
@@ -184,6 +190,7 @@
         });
         document.getElementById('historyList').innerHTML = '';
     });
+
 </script>
 
 </body>
