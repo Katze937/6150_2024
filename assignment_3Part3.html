@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast Searching System天氣查詢系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+        }
+        #weatherResult {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Weather</h1>
+    <!-- 輸入框和按鈕 -->
+    <label for="cityInput">Input City Name：</label>
+    <input type="text" id="cityInput" placeholder="Ex: Toronto">
+    <button id="fetchWeatherButton">Fetch Weather</button>
+    <button id="xhrWeatherButton">XHR Weather</button>
+
+    <!-- 顯示天氣結果的區域 -->
+    <div id="weatherResult"></div>
+
+    <script>
+        const apiKey = 'YOUR_ACCESS_KEY'; // 替換為你的 Weatherstack API key
+        const fetchWeatherButton = document.getElementById('fetchWeatherButton');
+        const xhrWeatherButton = document.getElementById('xhrWeatherButton');
+        const weatherResultDiv = document.getElementById('weatherResult');
+
+        // 使用 Fetch API 查詢天氣
+        fetchWeatherButton.addEventListener('click', function() {
+            const cityName = document.getElementById('cityInput').value;
+            if (!cityName) {
+                alert('Input City');
+                return;
+            }
+
+            const apiURL = `http://api.weatherstack.com/current?access_key=${apiKey}&query=${cityName}`;
+
+            // 使用 Fetch 發送 GET 請求
+            fetch(apiURL)
+                .then(response => response.json())
+                .then(data => {
+                    displayWeather(data); // 顯示天氣結果
+                })
+                .catch(error => {
+                    weatherResultDiv.innerHTML = `<p>Enquiry Failure: ${error}</p>`;
+                });
+        });
+
+        // 使用 XHR 查詢天氣
+        xhrWeatherButton.addEventListener('click', function() {
+            const cityName = document.getElementById('cityInput').value;
+            if (!cityName) {
+                alert('Input City');
+                return;
+            }
+
+            const apiURL = `http://api.weatherstack.com/current?access_key=${apiKey}&query=${cityName}`;
+
+            // 使用 XHR 發送 GET 請求
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', apiURL, true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    displayWeather(data); // 顯示天氣結果
+                } else {
+                    weatherResultDiv.innerHTML = `<p>Enquiry Failure, Error Code: ${xhr.status}</p>`;
+                }
+            };
+
+            xhr.onerror = function() {
+                weatherResultDiv.innerHTML = `<p>Enquiry Failure, Server Disconnect:</p>`;
+            };
+
+            xhr.send();
+        });
+
+        // 顯示天氣結果
+        function displayWeather(data) {
+            if (data.error) {
+                weatherResultDiv.innerHTML = `<p>Enquiry Failure:${data.error.info}</p>`;
+                return;
+            }
+
+            const weatherDesc = data.current.weather_descriptions[0];
+            const temperature = data.current.temperature;
+            const cityName = data.location.name;
+            const country = data.location.country;
+
+            weatherResultDiv.innerHTML = `
+                <h3>${cityName}, ${country} Weather</h3>
+                <p>Discription: ${weatherDesc}</p>
+                <p>Temperture: ${temperature} °C</p>
+            `;
+        }
+    </script>
+</body>
+</html>

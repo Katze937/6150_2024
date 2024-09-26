@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System</title>
+    <style>
+        /* 基本樣式 */
+        .user-list {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .user-list th, .user-list td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .user-list th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Registration Form</h1>
+    <!-- 使用者註冊表單 -->
+    <form id="userForm">
+        <label for="name">Name：</label>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="email">Email：</label>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age" min="1" required><br><br>
+        
+        <button type="submit">Submit </button>
+    </form>
+    
+    <!-- 顯示使用者列表 -->
+    <h2>All User List</h2>
+    <button id="loadUsersButton">Loading User List</button>
+    <table class="user-list">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Age</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody">
+            <!-- 使用者資料將會顯示在這裡 -->
+        </tbody>
+    </table>
+
+    <!-- 顯示結果的區域 -->
+    <div id="result"></div>
+
+    <script>
+        // 監聽表單提交事件，用於創建使用者
+        document.getElementById('userForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // 防止表單提交重新載入頁面
+            
+            // 獲取表單中的輸入資料
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const age = document.getElementById('age').value;
+
+            // 構造要傳送的資料
+            const userData = {
+                name: name,
+                email: email,
+                age: parseInt(age) // 將年齡轉換為整數
+            };
+
+            // 使用 Fetch 發送 POST 請求來創建使用者
+            fetch('https://smooth-comfort-405104.uc.r.appspot.com/document/createorupdate/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 使用 alert 顯示成功消息
+                alert('User creation success: ' + JSON.stringify(data));
+                // 更新使用者列表
+                loadUsers(); // 創建使用者成功後自動重新載入使用者列表
+            })
+            .catch(error => {
+                // 使用 alert 顯示錯誤消息
+                alert('User creation failed:' + error);
+            });
+        });
+
+        // 監聽按鈕點擊事件，用於載入使用者列表
+        document.getElementById('loadUsersButton').addEventListener('click', function() {
+            loadUsers();
+        });
+
+        // 定義一個函式來載入所有使用者
+        function loadUsers() {
+            // 使用 Fetch 發送 GET 請求來獲取所有使用者
+            fetch('https://smooth-comfort-405104.uc.r.appspot.com/document/findAll/users')
+                .then(response => response.json())
+                .then(users => {
+                    // 清空現有的列表
+                    const userTableBody = document.getElementById('userTableBody');
+                    userTableBody.innerHTML = ''; // 清空表格內容
+
+                    // 遍歷所有使用者，將資料顯示在表格中
+                    users.forEach(user => {
+                        const row = document.createElement('tr');
+
+                        // 創建每個使用者的行數據
+                        const idCell = document.createElement('td');
+                        idCell.textContent = user.id;
+                        row.appendChild(idCell);
+
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = user.name;
+                        row.appendChild(nameCell);
+
+                        const emailCell = document.createElement('td');
+                        emailCell.textContent = user.email;
+                        row.appendChild(emailCell);
+
+                        const ageCell = document.createElement('td');
+                        ageCell.textContent = user.age;
+                        row.appendChild(ageCell);
+
+                        // 將行數據加入表格
+                        userTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    alert('Fail to load user: ' + error);
+                });
+        }
+
+        // 頁面加載時自動載入使用者列表
+        loadUsers();
+    </script>
+</body>
+</html>
