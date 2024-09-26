@@ -45,6 +45,7 @@
             fetch('https://smooth-comfort-405104.uc.r.appspot.com/document/createorupdate/users', {
                 method: 'POST',
                 headers: {
+                    'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjI2OTY4MTdkODMwMjQzZWQ2NTVhNiIsInVzZXJuYW1lIjoiWXUtUGVpIiwiaWF0IjoxNzI3MTYyNzM1LCJleHAiOjE3MjkzMjI3MzV9.REf_zwl166ktB8o3s083dT1YVPWNLLJgMzdPRO7mQX0', // 替換為題目給的Token
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(userData)
