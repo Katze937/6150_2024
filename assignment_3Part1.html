@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User Form</title>
+</head>
+<body>
+    <h1>User Registration Form</h1>
+    <!-- 使用者註冊表單 -->
+    <form id="userForm">
+        <label for="userId">User ID：</label>
+        <input type="number" id="userId" name="userId" required><br><br>
+
+        <label for="username">Username：</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="email">Email：</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="firstName">First Name：</label>
+        <input type="text" id="firstName" name="firstName" required><br><br>
+
+        <label for="lastName">Last Name：</label>
+        <input type="text" id="lastName" name="lastName" required><br><br>
+
+        <label for="age">Age：</label>
+        <input type="number" id="age" name="age" required><br><br>
+
+        <label for="street">Street：</label>
+        <input type="text" id="street" name="street" required><br><br>
+
+        <label for="city">City：</label>
+        <input type="text" id="city" name="city" required><br><br>
+
+        <label for="state">State：</label>
+        <input type="text" id="state" name="state" required><br><br>
+
+        <label for="zipCode">Zip Code：</label>
+        <input type="text" id="zipCode" name="zipCode" required><br><br>
+
+        <label for="language">Preferred Language：</label>
+        <input type="text" id="language" name="language" required><br><br>
+
+        <label for="timezone">Timezone：</label>
+        <input type="text" id="timezone" name="timezone" required><br><br>
+
+        <label for="emailNotifications">Email Notifications：</label>
+        <input type="checkbox" id="emailNotifications" name="emailNotifications"><br><br>
+
+        <label for="smsNotifications">SMS Notifications：</label>
+        <input type="checkbox" id="smsNotifications" name="smsNotifications"><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <!-- 顯示結果的區域 -->
+    <div id="result"></div>
+
+    <script>
+        // 監聽表單提交事件
+        document.getElementById('userForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // 防止表單提交重新載入頁面
+
+            // 獲取表單中的輸入資料
+            var userId = document.getElementById('userId').value;
+            var username = document.getElementById('username').value;
+            var email = document.getElementById('email').value;
+            var firstName = document.getElementById('firstName').value;
+            var lastName = document.getElementById('lastName').value;
+            var age = document.getElementById('age').value;
+            var street = document.getElementById('street').value;
+            var city = document.getElementById('city').value;
+            var state = document.getElementById('state').value;
+            var zipCode = document.getElementById('zipCode').value;
+            var language = document.getElementById('language').value;
+            var timezone = document.getElementById('timezone').value;
+            var emailNotifications = document.getElementById('emailNotifications').checked;
+            var smsNotifications = document.getElementById('smsNotifications').checked;
+
+            // 建立要傳送的 JSON 資料
+            var data = JSON.stringify({
+              "user": {
+                "id": parseInt(userId), // 將 User ID 轉換為整數
+                "username": username,
+                "email": email,
+                "profile": {
+                  "first_name": firstName,
+                  "last_name": lastName,
+                  "age": parseInt(age), // 將年齡轉換為整數
+                  "address": {
+                    "street": street,
+                    "city": city,
+                    "state": state,
+                    "zip_code": zipCode
+                  }
+                },
+                "preferences": {
+                  "language": language,
+                  "timezone": timezone,
+                  "notification_settings": {
+                    "email_notifications": emailNotifications,
+                    "sms_notifications": smsNotifications
+                  }
+                },
+                "account_status": "active",
+                "created_at": new Date().toISOString() // 自動生成當前時間
+              }
+            });
+
+            // 使用 XMLHttpRequest 發送 POST 請求
+            var xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("readystatechange", function() {
+                if (this.readyState === 4) {
+                    // 處理回應結果
+                    document.getElementById('result').innerText = 'Response: ' + this.responseText;
+                }
+            });
+
+            // 打開連接並設置請求標頭
+            xhr.open("POST", "https://smooth-comfort-405104.uc.r.appspot.com/document/createorupdate/users");
+            xhr.setRequestHeader("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZjI2OTY4MTdkODMwMjQzZWQ2NTVhNiIsInVzZXJuYW1lIjoiWXUtUGVpIiwiaWF0IjoxNzI3MTYyNzM1LCJleHAiOjE3MjkzMjI3MzV9.REf_zwl166ktB8o3s083dT1YVPWNLLJgMzdPRO7mQX0");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            // 發送請求並傳送 JSON 資料
+            xhr.send(data);
+        });
+    </script>
+</body>
+</html>
