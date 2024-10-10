@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import './App.css';
 
 // 創建 UserContext 來管理使用者資料
@@ -34,6 +34,15 @@ const UserForm = ({ editingUser, setEditingUser }) => {
   const { addUser, updateUser } = useContext(UserContext);
   const [formData, setFormData] = useState(editingUser || { name: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
+
+  // 使用 useEffect 監聽 editingUser 的變化，並更新表單資料
+  useEffect(() => {
+    if (editingUser) {
+      setFormData(editingUser); // 將 editingUser 的資料填入表單
+    } else {
+      setFormData({ name: '', email: '', password: '', confirmPassword: '' }); // 清空表單
+    }
+  }, [editingUser]);
 
   // 檢查電子郵件格式的正則表達式
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
